@@ -1,0 +1,5 @@
+name: Plots
+version: 1.0
+author: Snrk
+main: de.skyshard.plots.Main
+api-version: 1.12
