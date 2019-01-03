@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact name="plots:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/plots_jar</output-path>
+    <output-path>$PROJECT_DIR$/../../../server/plugins</output-path>
     <root id="root">
       <element id="archive" name="plots.jar">
         <element id="module-output" name="plots" />
