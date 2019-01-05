@@ -1,7 +1,6 @@
 package de.skyshard.plots;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
