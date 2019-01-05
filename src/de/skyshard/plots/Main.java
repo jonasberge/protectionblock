@@ -14,21 +14,10 @@ public class Main extends JavaPlugin
     public void onEnable()
     {
         PluginManager pluginManager = getServer().getPluginManager();
+        WorldGuardPlugin worldGuard = (WorldGuardPlugin)pluginManager.getPlugin("WorldGuard");
 
-        final String pluginName = "WorldGuard";
-        Plugin worldGuardPlugin = pluginManager.getPlugin(pluginName);
-
-        if (!(worldGuardPlugin instanceof WorldGuardPlugin)) {
-            System.out.println("[Plots] missing plugin dependency: " + pluginName);
-            pluginManager.disablePlugin(this);
-            return;
-        }
-
-        WorldGuardPlugin worldGuard = (WorldGuardPlugin)worldGuardPlugin;
         BlockListener blockListener = new BlockListener(worldGuard);
         pluginManager.registerEvents(blockListener, this);
-
-        System.out.print("[Plots] plugin successfully loaded");
     }
 
     /**
