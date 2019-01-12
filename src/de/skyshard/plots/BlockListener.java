@@ -6,14 +6,14 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import net.minecraft.server.v1_12_R1.BlockStainedGlassPane;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.map.MapPalette;
+import org.bukkit.material.Colorable;
 import org.bukkit.util.Vector;
 
 import java.util.UUID;
@@ -32,7 +32,8 @@ public class BlockListener implements Listener
     {
         // constants for testing purposes.
         final Material centerMaterial = Material.GOLD_BLOCK;
-        final Material fenceMaterial = Material.FENCE;
+        final Material fenceMaterial = Material.STAINED_GLASS_PANE;
+        final byte fenceData = MapPalette.WHITE;
         final String regionPattern = "[^A-Za-z0-9_,'\\-+/]";
         final int maxHeight = 255;
         final int radius = 10;
@@ -69,25 +70,21 @@ public class BlockListener implements Listener
         regions.addRegion(region);
 
         Location loc = centerBlock.getLocation();
-        placeFence(world, loc.getBlockX() - radius, loc.getBlockZ() - radius, 1, 0, 2 * radius, fenceMaterial);
-        placeFence(world, loc.getBlockX() + radius, loc.getBlockZ() - radius, 0, 1, 2 * radius, fenceMaterial);
-        placeFence(world, loc.getBlockX() + radius, loc.getBlockZ() + radius, -1, 0, 2 * radius, fenceMaterial);
-        placeFence(world, loc.getBlockX() - radius, loc.getBlockZ() + radius, 0, -1, 2 * radius, fenceMaterial);
+        final int x = loc.getBlockX(), y = loc.getBlockY(), z = loc.getBlockZ();
+        placeFence(new Location(world, x - radius, y, z - radius), Direction.EAST, fenceMaterial, fenceData, 2 * radius);
+        placeFence(new Location(world, x + radius, y, z - radius), Direction.SOUTH, fenceMaterial, fenceData, 2 * radius);
+        placeFence(new Location(world, x + radius, y, z + radius), Direction.WEST, fenceMaterial, fenceData, 2 * radius);
+        placeFence(new Location(world, x - radius, y, z + radius), Direction.NORTH, fenceMaterial, fenceData, 2 * radius);
     }
 
-    private void placeFence(World world, int x, int z, int xOffset, int zOffset, int length, Material material)
+    private void placeFence(Location loc, Direction dir, Material material, byte data, int length)
     {
-        for (int i = 0; i < length; ++i, x += xOffset, z += zOffset) {
-            Block block = null;
-            for (int y = (1 << 8) - 1; y > 0; --y) {
-                Block b = world.getBlockAt(x, y, z);
-                if (b.getType() != Material.AIR)
-                    break;
-                block = b;
-            }
-
-            if (block != null)
+        for (int i = 0; i < length; ++i, loc.add(dir.getVector())) {
+            Block block = loc.getBlock();
+            if (block.getType() == Material.AIR) {
                 block.setType(material);
+                block.setData((byte)1);
+            }
         }
     }
 }
