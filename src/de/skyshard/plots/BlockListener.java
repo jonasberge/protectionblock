@@ -35,7 +35,9 @@ public class BlockListener implements Listener
         final Material fenceMaterial = Material.STAINED_GLASS_PANE;
         final byte fenceData = MapPalette.WHITE;
         final String regionPattern = "[^A-Za-z0-9_,'\\-+/]";
-        final int maxHeight = 255;
+        final int height = 60, minHeight = 1, maxHeight = 255;
+        // TODO: you're not allowed to set a block outside the bounds.
+        // TODO: height may only be greater than 0.
         final int radius = 10;
 
         Block centerBlock = event.getBlock();
@@ -53,9 +55,20 @@ public class BlockListener implements Listener
         String regionName = String.format("plots-%s-%s-%d-%d-%d",
                 worldName, uuid, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 
+        int x = pos.getBlockX(), y = pos.getBlockY(), z = pos.getBlockZ();
+
+        // the cuboid always needs to have the same height, no matter where the block is placed.
+        // ideally both the ceiling and the bottom of the region should be evenly distanced from the
+        // position at which the block was placed, though this can't happen if it is placed too close
+        // to one of the bounds of the to be created region. in that case the offsets need to be
+        // shifted in one or the other direction.
+        int below = height / 2, above = height - below - 1;
+        if (y - below < minHeight) above = height - (below = y - minHeight) - 1;
+        if (y + above > maxHeight) below = height - (above = maxHeight - y) - 1;
+
         // the region is defined as a cuboid, where each side is equally distant from the center block.
-        BlockVector pointA = new BlockVector(pos.getBlockX() - radius, 0, pos.getBlockZ() - radius);
-        BlockVector pointB = new BlockVector(pos.getBlockX() + radius, maxHeight, pos.getBlockZ() + radius);
+        BlockVector pointA = new BlockVector(x - radius, y - below, z - radius);
+        BlockVector pointB = new BlockVector(x + radius, y + above, z + radius);
         ProtectedRegion region = new ProtectedCuboidRegion(regionName, pointA, pointB);
 
         RegionContainer container = worldGuard.getRegionContainer();
@@ -69,8 +82,6 @@ public class BlockListener implements Listener
         region.getOwners().addPlayer(uuid);
         regions.addRegion(region);
 
-        Location loc = centerBlock.getLocation();
-        final int x = loc.getBlockX(), y = loc.getBlockY(), z = loc.getBlockZ();
         placeFence(new Location(world, x - radius, y, z - radius), Direction.EAST, fenceMaterial, fenceData, 2 * radius);
         placeFence(new Location(world, x + radius, y, z - radius), Direction.SOUTH, fenceMaterial, fenceData, 2 * radius);
         placeFence(new Location(world, x + radius, y, z + radius), Direction.WEST, fenceMaterial, fenceData, 2 * radius);
