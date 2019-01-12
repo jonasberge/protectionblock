@@ -83,7 +83,7 @@ public class BlockListener implements Listener
             Block block = loc.getBlock();
             if (block.getType() == Material.AIR) {
                 block.setType(material);
-                block.setData((byte)1);
+                block.setData((byte)data);
             }
         }
     }
